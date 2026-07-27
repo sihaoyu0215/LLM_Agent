@@ -43,8 +43,7 @@ C     --- Local variables ---
 	  DOUBLE PRECISION DSTATE, REL_STRESS_CHANGE, DSIG_NORM, STRESS_NORM
 	  DOUBLE PRECISION DDSDDE_ELASTIC(6,6)
       INTEGER I,J, iter, max_iter
-      LOGICAL PLASTIC
-	  
+      LOGICAL PLASTIC	  
 C     --- Useful constants ---
       DOUBLE PRECISION ONE, TWO, THREE, SIX, ZERO, SQRT23, SMALL
       PARAMETER (ONE=1.D0, TWO=2.D0, THREE=3.D0, SIX=6.D0, ZERO=0.D0)
@@ -103,10 +102,6 @@ C     Compute trial mean stress p_tr for moduli update
 	  END IF
 
 
-
-
-
-
 C*****************************************************************
       G_CUR = G0 * ((2.973D0-E0)**2/(1.D0+E0)) * SQRT(p * PATM)
       K_CUR = TWO*(ONE+NU)/THREE/(ONE-TWO*NU) * G_CUR
@@ -126,10 +121,6 @@ C
       CALL STRESS_INVARIANTS(SIGTR, p, q, SIGDEV, s_norm)
       IF (p .LT. SMALL) p = SMALL
 	  
-
-
-
-
 
 C*****************************************************************      
 C     --- Yield function ---
@@ -157,8 +148,10 @@ C        --- Plastic step: Return mapping ---
          END DO
 	     
 	     e = e - (1 + E0) * (STRAIN_INC(1) + STRAIN_INC(2) + STRAIN_INC(3));
-	     
+
+  
          DO WHILE (iter .LT. max_iter)
+ 		 
             H_OLD = H
 
             iter = iter + 1
@@ -219,7 +212,7 @@ C           --- Update p, q, etc. for next iteration ---
             CALL STRESS_INVARIANTS(SIGTR, p, q, SIGDEV, s_norm)
             IF (p .LT. SMALL) p = SMALL
             IF (q .LT. SMALL) q = SMALL
-            PHI = q - H * p
+
 			
 
             DSTATE = ABS(H - H_OLD) / ABS(H)
@@ -233,17 +226,22 @@ C           --- Update p, q, etc. for next iteration ---
             STRESS_NORM = SQRT(STRESS_NORM)
             IF (STRESS_NORM .LT. SMALL) STRESS_NORM = SMALL
             REL_STRESS_CHANGE = DSIG_NORM / STRESS_NORM
+			
+
+            PHI = q - H * p
+			
 			DO I=1,6
                 STRESS_OLD(I) = SIGTR(I)
             END DO
 	   	 
 		 
 C           --- Convergence check ---
-            IF (PHI .LT. 1E-8 .AND. REL_STRESS_CHANGE .LT. 1E-6 .AND. DSTATE .LT. 1E-6) THEN 
+            IF (PHI .LT. 1E-8 .AND. REL_STRESS_CHANGE .LT. 1E-6 .AND. DSTATE .LT. 1E-6) THEN
                EXIT
             END IF
 	   
-         END DO  ! END PLASTIC ITERATION
+         END DO
+
 	   
 C        --- Update state variables ---
          dPEEQ = DLAM_TRY * SQRT23
@@ -253,7 +251,7 @@ C        --- Update state variables ---
 		 
 		 CALL CONSISTENT_TANGENT(DDSDDE_ELASTIC, R, N, Kp, DDSDDE)
 		 
-	  END IF  ! END PHI
+	  END IF 
 
 C     --- Final stress update ---
       DO I=1,6
@@ -265,19 +263,13 @@ C     --- Store state variables ---
       STATEV(2) = e
       STATEV(3) = PEEQ
 C
+	 
 C     --- End of UMAT ---
 C
 C     --- Subroutines ---
 C
 
       END
-
-
-
-
-
-
-
 
 
 
